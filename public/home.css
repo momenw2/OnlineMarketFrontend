@@ -36,5 +36,14 @@ body {
     color: white;
     font-size: 2rem;
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    /* text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); */
+  }
+  
+  .overlayText a{
+    text-decoration: none;
+    color: white;
+  }
+
+  .overlayText a:hover{
+    color: black;
   }
