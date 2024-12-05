@@ -10,7 +10,7 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Start the server
 app.listen(PORT, () => {
@@ -19,6 +19,7 @@ app.listen(PORT, () => {
 
 // Route for rendering various pages
 app.get("/", (req, res) => res.render("home"));
+app.get("/logIn", (req, res) => res.render("login"));
 
 
 // Error Handler for 404 Not Found
