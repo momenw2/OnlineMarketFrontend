@@ -4,8 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>login</title>
+    <style>
+        .error { color: red; }
+        .success { color: green; }
+        form { margin: 20px; }
+        input, button { margin: 10px 0; display: block; }
+    </style>
 </head>
 <body>
     <%- include('partials/header.ejs') -%>
+
+    <form id="login-form">
+        <label for="email">Email:</label>
+        <input type="email" id="email" required />
+      
+        <label for="password">Password:</label>
+        <input type="password" id="password" required />
+      
+        <button type="submit">Login</button>
+    </form>
+      
+    <div id="message"></div>
+      
+    <script>
+        const API_URL = 'http://localhost:5278';
+
+        async function login(email, password) {
+            try {
+                console.log('Attempting login...', { email });
+                
+                const response = await fetch(`${API_URL}/api/account/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Login failed');
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Login error:', error);
+                throw error;
+            }
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const messageElement = document.getElementById('message');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                messageElement.innerText = 'Logging in...';
+                messageElement.className = '';
+
+                const result = await login(email, password);
+                
+                messageElement.innerText = 'Login successful!';
+                messageElement.className = 'success';
+
+                // Store token
+                localStorage.setItem('token', result.token);
+                
+                // Redirect after a short delay
+                // setTimeout(() => {
+                //     window.location.href = '/dashboard';
+                // }, 1000);
+                
+            } catch (error) {
+                console.error('Login failed:', error);
+                messageElement.innerText = error.message || 'Login failed. Please try again.';
+                messageElement.className = 'error';
+            }
+        });
+    </script>
 </body>
 </html>
