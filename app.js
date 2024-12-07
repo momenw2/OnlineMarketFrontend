@@ -20,6 +20,7 @@ app.listen(PORT, () => {
 // Route for rendering various pages
 app.get("/", (req, res) => res.render("home"));
 app.get("/logIn", (req, res) => res.render("login"));
+app.get("/signUp", (req, res) => res.render("signup"));
 
 
 // Error Handler for 404 Not Found
