@@ -71,3 +71,18 @@ body {
     border-radius: 20px;
     padding: 5px;
 }
+
+.inputBox button{
+    padding: 15px;
+    width: 25%;
+    border: none;
+    background-color: rgb(237, 168, 156);
+    color: white;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.inputBox button:hover{
+    background-color: rgb(253, 253, 253);
+    color: rgb(24, 24, 24);
+}
