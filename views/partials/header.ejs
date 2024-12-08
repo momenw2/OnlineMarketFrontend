@@ -1,40 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/header.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <title>Document</title>
-  </head>
-  <body>
-    <header>
-      <div class="menu-btn">
-        <i class="fas fa-bars"></i>
-      </div>
-      <div class="logo">
-        <a href="/"><img src="images/logo.png" alt="Logo" /></a>
-      </div>
-      <div class="links">
-        <div class="pages">
-          <a href="#">ABOUT US</a>
-          <a href="#">MENU</a>
-          <a href="#">KOKO</a>
-        </div>
-      </div>
-      <!-- <div class="cartIconBox">
-        <a href="#"><i class="fas fa-shopping-bag"></i></a>
-        <span class="cart-quantity" id="cartQuantityH">0</span>
-      </div> -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/header.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Header with Dropdown</title>
+    <style>
+        /* Basic styling for the dropdown */
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
 
-      <div class="enterLinks">
-        <a href="/logIn">Login</a>
-        <a href="/signUp">Sign Up</a>
-      </div>
+        .user-dropdown .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .user-dropdown .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .user-dropdown .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .user-dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .user-dropdown .user-name {
+            cursor: pointer;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="menu-btn">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="logo">
+            <a href="/"><img src="images/logo.png" alt="Logo"></a>
+        </div>
+        <div class="links">
+            <div class="pages">
+                <a href="#">ABOUT US</a>
+                <a href="#">MENU</a>
+                <a href="#">KOKO</a>
+            </div>
+        </div>
+        <div class="enterLinks" id="user-links">
+            <a href="/logIn">Login</a>
+            <a href="/signUp">Sign Up</a>
+        </div>
     </header>
-     
-  </body>
+
+    <script>
+        const API_URL = 'http://localhost:5278';
+
+        async function fetchProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) return null;
+
+            try {
+                const response = await fetch(`${API_URL}/api/account/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile.');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Profile fetch error:', error);
+                return null;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const userLinks = document.getElementById('user-links');
+
+            if (token) {
+                let fullName = localStorage.getItem('userFullName');
+
+                if (!fullName) {
+                    const profile = await fetchProfile();
+                    if (profile) {
+                        fullName = profile.fullName;
+                        localStorage.setItem('userFullName', fullName);
+                    }
+                }
+
+                if (fullName) {
+                    userLinks.innerHTML = `
+                        <div class="user-dropdown">
+                            <span class="user-name">${fullName} <i class="fas fa-caret-down"></i></span>
+                            <div class="dropdown-content">
+                                <a href="/profile">Profile</a>
+                                <a href="/orders">Orders</a>
+                                <a href="#" onclick="logout()">Logout</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userFullName');
+            window.location.href = '/'; // Redirect to home page
+        }
+    </script>
+</body>
 </html>
