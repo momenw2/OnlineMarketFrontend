@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <style>
+        .error { color: red; }
+        .success { color: green; }
+        form { margin: 20px; }
+        input, button { margin: 10px 0; display: block; }
+    </style>
+</head>
+<body>
+    <div id="message"></div>
+    <h1>Edit Profile</h1>
+    <form id="profile-form">
+        <label for="fullName">Full Name:</label>
+        <input type="text" id="fullName" name="fullName" required>
+
+        <label for="birthDate">Birth Date:</label>
+        <input type="date" id="birthDate" name="birthDate" required>
+
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" required>
+
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="tel" id="phoneNumber" name="phoneNumber" required>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <script>
+        const API_URL = 'http://localhost:5278';
+        const token = localStorage.getItem('token');
+        const messageElement = document.getElementById('message');
+
+        // Fetch and populate the profile form with user data
+        async function fetchProfile() {
+            try {
+                const response = await fetch(`${API_URL}/api/account/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile.');
+                }
+
+                const profile = await response.json();
+                document.getElementById('fullName').value = profile.fullName;
+                document.getElementById('birthDate').value = profile.birthDate.split('T')[0];
+                document.getElementById('gender').value = profile.gender;
+                document.getElementById('address').value = profile.address;
+                document.getElementById('phoneNumber').value = profile.phoneNumber;
+            } catch (error) {
+                console.error('Profile fetch error:', error);
+                messageElement.textContent = error.message || 'Failed to load profile.';
+                messageElement.className = 'error';
+            }
+        }
+
+        // Update profile data
+        async function updateProfile(updatedData) {
+            try {
+                const response = await fetch(`${API_URL}/api/account/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save changes.');
+                }
+
+                messageElement.textContent = 'Profile updated successfully!';
+                messageElement.className = 'success';
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                messageElement.textContent = error.message || 'An unexpected error occurred.';
+                messageElement.className = 'error';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('profile-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const updatedData = {
+                fullName: document.getElementById('fullName').value,
+                birthDate: document.getElementById('birthDate').value,
+                gender: document.getElementById('gender').value,
+                address: document.getElementById('address').value,
+                phoneNumber: document.getElementById('phoneNumber').value
+            };
+
+            await updateProfile(updatedData);
+        });
+
+        // Load the profile data on page load
+        fetchProfile();
+    </script>
+</body>
+</html>
