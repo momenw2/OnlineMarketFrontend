@@ -22,6 +22,7 @@ app.get("/", (req, res) => res.render("home"));
 app.get("/logIn", (req, res) => res.render("login"));
 app.get("/signUp", (req, res) => res.render("signup"));
 app.get("/Profile", (req, res) => res.render("profile"));
+app.get("/Menu", (req, res) => res.render("menu"));
 
 
 // Error Handler for 404 Not Found

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .dish-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .dish-details {
+            flex-grow: 1;
+        }
+        .pagination {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 8px 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Menu</h1>
+    <div id="menu"></div>
+    <div class="pagination">
+        <button id="prev-page">Previous</button>
+        <button id="next-page">Next</button>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5278/api/dish';
+        const menuContainer = document.getElementById('menu');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+
+        let currentPage = 1;
+
+        async function fetchDishes(page = 1) {
+    try {
+        const response = await fetch(`${API_URL}?page=${page}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch dishes');
+        }
+
+        const data = await response.json();
+        console.log('API Response:', data); // Debugging
+
+        // Access the array of dishes inside the `$values` property
+        const dishes = data.dishes?.$values || []; 
+        displayDishes(dishes);
+        handlePagination(data.pagination);
+    } catch (error) {
+        console.error('Error fetching dishes:', error);
+        menuContainer.innerHTML = '<p>Failed to load dishes. Please try again later.</p>';
+    }
+}
+
+function displayDishes(dishes) {
+    if (!Array.isArray(dishes)) {
+        console.error('Expected an array for dishes but received:', dishes);
+        return;
+    }
+
+    menuContainer.innerHTML = '';
+    dishes.forEach(dish => {
+        const dishCard = document.createElement('div');
+        dishCard.className = 'dish-card';
+        dishCard.innerHTML = `
+            <div class="dish-details">
+                <h3>${dish.name}</h3>
+                <p>Category: ${dish.category || 'N/A'}</p>
+                <p>Price: $${dish.price.toFixed(2)}</p>
+                <p>Rating: ${dish.rating ? dish.rating.toFixed(1) : 'N/A'}</p>
+                <p>Vegetarian: ${dish.vegetarian ? 'Yes' : 'No'}</p>
+            </div>
+        `;
+        menuContainer.appendChild(dishCard);
+    });
+}
+
+
+
+        // Handle pagination
+        function handlePagination(pagination) {
+            prevButton.disabled = pagination.current === 1;
+            nextButton.disabled = pagination.current === Math.ceil(pagination.count / pagination.size);
+
+            prevButton.onclick = () => {
+                if (pagination.current > 1) {
+                    fetchDishes(--currentPage);
+                }
+            };
+
+            nextButton.onclick = () => {
+                if (pagination.current < Math.ceil(pagination.count / pagination.size)) {
+                    fetchDishes(++currentPage);
+                }
+            };
+        }
+
+        // Initial fetch
+        fetchDishes(currentPage);
+    </script>
+</body>
+</html>
